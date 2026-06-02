@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🧭 Arquiteto Decisor
+# Arquiteto Decisor
 
 **SaaS para registrar, versionar e comparar trade-offs de decisões arquiteturais (ADRs).**
 
@@ -10,7 +10,7 @@
 
 ---
 
-## 📌 Visão Executiva
+## Visão Executiva
 
 ### O que é
 O **Arquiteto Decisor** é uma plataforma multi-tenant onde times de engenharia
@@ -40,7 +40,7 @@ As três decisões estruturantes desta fase estão registradas como ADRs
 
 ---
 
-## 🧱 Diagrama C4 de Containers
+## Diagrama C4 de Containers
 
 > Diagrama renderizado diretamente em **Mermaid** (sintaxe nativa, sem imagens
 > externas). Versão isolada em [`docs/diagrams/c4-container.md`](docs/diagrams/c4-container.md).
@@ -84,7 +84,7 @@ Demais visões: [Contexto (C4 L1)](docs/diagrams/c4-context.md) ·
 
 ---
 
-## 🛠️ Stack Tecnológica
+## Stack Tecnológica
 
 | Camada | Tecnologia | Papel |
 |---|---|---|
@@ -96,7 +96,7 @@ Demais visões: [Contexto (C4 L1)](docs/diagrams/c4-context.md) ·
 
 ---
 
-## 📂 Estrutura do Repositório
+## Estrutura do Repositório
 
 ```
 arquiteto-decisor-c3/
@@ -118,7 +118,7 @@ arquiteto-decisor-c3/
 
 ---
 
-## ▶️ Como Executar Localmente
+## Como Executar Localmente
 
 ### Pré-requisitos
 - Docker + Docker Compose
@@ -170,7 +170,7 @@ make down          # ou: make clean (remove volumes)
 
 ---
 
-## 📐 Decisões Arquiteturais (ADRs)
+## Decisões Arquiteturais (ADRs)
 
 | # | Decisão | Documento |
 |---|---|---|
@@ -183,7 +183,7 @@ make down          # ou: make clean (remove volumes)
 
 ---
 
-## 🗺️ Roadmap
+## Roadmap
 
 - [ ] Autenticação OIDC real no gateway
 - [ ] Padrão *Transactional Outbox* no decisions-service
@@ -192,11 +192,6 @@ make down          # ou: make clean (remove volumes)
 - [ ] Interface web para navegação dos ADRs
 
 ---
-
-## 👥 Equipe
-
-Projeto **Arquiteto Decisor** — Ciclo 3 (Fase Cloud & Microsserviços).
-Adicione aqui os integrantes da equipe.
 
 ## 📄 Licença
 
