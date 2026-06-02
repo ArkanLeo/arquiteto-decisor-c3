@@ -1,0 +1,12 @@
+# Configuração compartilhada do ruff para todos os serviços.
+line-length = 100
+target-version = "py312"
+
+[lint]
+select = ["E", "F", "I", "UP", "B"]
+# Eventos de startup do FastAPI e dublês de teste podem disparar B008/B017;
+# mantemos o conjunto enxuto e pragmático para o escopo do projeto.
+ignore = ["B008"]
+
+[lint.per-file-ignores]
+"**/tests/*" = ["E501"]

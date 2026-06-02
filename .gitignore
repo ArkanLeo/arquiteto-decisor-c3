@@ -1,0 +1,53 @@
+# ───────────────────────── Python ─────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+.Python
+pip-wheel-metadata/
+
+# Ambientes virtuais
+.venv/
+venv/
+env/
+ENV/
+
+# Ferramentas / cache
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# ───────────────────────── Variáveis de ambiente ──────────
+.env
+.env.*
+!.env.example
+
+# ───────────────────────── SQLite (dev/CI) ────────────────
+*.db
+*.sqlite3
+
+# ───────────────────────── Docker ─────────────────────────
+*.pid
+docker-data/
+pgdata/
+
+# ───────────────────────── IDEs / Editores ────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ───────────────────────── Sistema operacional ────────────
+.DS_Store
+Thumbs.db
+
+# ───────────────────────── Logs ───────────────────────────
+*.log
+logs/
