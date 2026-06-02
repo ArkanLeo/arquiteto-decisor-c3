@@ -1,0 +1,120 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Arquiteto Decisor — orquestração local da malha de microsserviços (Fase 3)
+#
+# Topologia:
+#   cliente → api-gateway → {decisions-service, catalog-service}
+#   decisions-service ──(evento "decision.approved")──▶ RabbitMQ ──▶ notification-service
+#
+# Persistência: database-per-service (um schema Postgres por serviço de domínio).
+# Mensageria:   RabbitMQ (AMQP 0-9-1) para comunicação assíncrona event-driven.
+# Cache/estado: Redis (rate limit do gateway).
+# ─────────────────────────────────────────────────────────────────────────────
+name: arquiteto-decisor
+
+services:
+  # ───────────────────────────── Infraestrutura ─────────────────────────────
+  postgres-decisions:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: decisor
+      POSTGRES_PASSWORD: decisor
+      POSTGRES_DB: decisions
+    volumes:
+      - pg-decisions:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U decisor -d decisions"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  postgres-catalog:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: decisor
+      POSTGRES_PASSWORD: decisor
+      POSTGRES_DB: catalog
+    volumes:
+      - pg-catalog:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U decisor -d catalog"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    ports:
+      - "15672:15672"   # painel de gerência
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ─────────────────────────── Serviços de domínio ──────────────────────────
+  catalog-service:
+    build: ./src/catalog-service
+    environment:
+      DATABASE_URL: postgresql+psycopg://decisor:decisor@postgres-catalog:5432/catalog
+    depends_on:
+      postgres-catalog:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health').status==200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  decisions-service:
+    build: ./src/decisions-service
+    environment:
+      DATABASE_URL: postgresql+psycopg://decisor:decisor@postgres-decisions:5432/decisions
+      CATALOG_URL: http://catalog-service:8000
+      AMQP_URL: amqp://guest:guest@rabbitmq:5672/
+    depends_on:
+      postgres-decisions:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      catalog-service:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health').status==200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  notification-service:
+    build: ./src/notification-service
+    environment:
+      AMQP_URL: amqp://guest:guest@rabbitmq:5672/
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  # ───────────────────────────── Borda (gateway) ────────────────────────────
+  api-gateway:
+    build: ./src/api-gateway
+    ports:
+      - "8080:8000"     # única porta exposta ao mundo externo
+    environment:
+      DECISIONS_URL: http://decisions-service:8000
+      CATALOG_URL: http://catalog-service:8000
+      REDIS_URL: redis://redis:6379/0
+      RATE_LIMIT_PER_MINUTE: "120"
+    depends_on:
+      - decisions-service
+      - catalog-service
+      - redis
+
+volumes:
+  pg-decisions:
+  pg-catalog:
